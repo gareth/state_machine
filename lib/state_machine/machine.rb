@@ -930,11 +930,11 @@ module StateMachine
     #   if no transitions can be performed.
     # * <tt>park(..., run_action = true)</tt> - Fires the "park" event,
     #   transitioning from the current state to the next valid state.  The last
-    #   argument, if specified, controls whether the machine's action gets run.
+    #   argument, if a boolean, controls whether the machine's action gets run.
     # * <tt>park!(..., run_action = true)</tt> - Fires the "park" event,
     #   transitioning from the current state to the next valid state.  If the
     #   transition fails, then a StateMachine::InvalidTransition error will be
-    #   raised.  The last argument, if specified, controls whether the machine's
+    #   raised.  The last argument, if a boolean, controls whether the machine's
     #   action gets run.
     # 
     # With a namespace of "car", the above names map to the following methods:
@@ -998,16 +998,11 @@ module StateMachine
     #   end
     # 
     # Note that +super+ is called instead of <tt>super(*args)</tt>.  This allows
-    # the caller to still be able to pass in the +run_action+ argument which
-    # controls whether the machine's action gets run when the event is
-    # triggered.  For example:
+    # the entire arguments list to be accessed by the overridden event method
+    # and transition callbacks - remember that the last argument passed in, if a
+    # boolean, will be used as the +run_action+ parameter to the event method.
     # 
-    #   vehicle.park                    # => Uses default args and runs machine action
-    #   vehicle.park(:parallel)         # => Specifies the +kind+ argument and runs the machine action
-    #   vehicle.park(:parallel, false)  # => Specifies the +kind+ argument and *skips* the machine action
-    # 
-    # 
-    # All arguments that are passed to the event will also be available through
+    # You can access this arguments list from inside a transition through
     # StateMachine::Transition#args like so:
     # 
     #   after_transition :on => :park do |vehicle, transition|
