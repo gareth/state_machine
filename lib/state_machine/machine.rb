@@ -261,19 +261,21 @@ module StateMachine
   #       end
   #     end
   #     
-  #     def park(*args)
+  #     def can_park?
   #       logger.info "..."
   #       super
   #     end
   #   end
   # 
-  # In the above example, the +park+ instance method that's generated on the
-  # Vehicle class (by the associated event) is overridden with custom behavior.
-  # Once this behavior is complete, the original method from the state machine
-  # is invoked by simply calling +super+.
+  # In the above example, the +can_park?+ instance method that's generated on
+  # the Vehicle class (by the associated event) is overridden with custom
+  # behavior. Once this behavior is complete, the original method from the
+  # state machine is invoked by simply calling +super+.
   # 
   # The same technique can be used for +state+, +state_name+, and all other
-  # instance *and* class methods on the Vehicle class.
+  # instance *and* class methods on the Vehicle class.  However, when overriding
+  # event methods in this way, first read the note "Overriding the event method"
+  # for StateMachine::Machine.event
   # 
   # == Integrations
   # 
@@ -977,9 +979,12 @@ module StateMachine
     #     end
     #   end 
     # 
-    # == Defining additional arguments
+    # == Overriding the event method
     # 
-    # Additional arguments on event actions can be defined like so:
+    # You can override the generated event method in your class, and as long as
+    # you call +super+ the event will still be triggered.  This will allow you
+    # to take additional named arguments and give you a more flexible way to
+    # specify whether an event is run:
     # 
     #   class Vehicle
     #     state_machine do
@@ -998,12 +1003,14 @@ module StateMachine
     #     end
     #   end
     # 
-    # Note that +super+ is called instead of <tt>super(*args)</tt>.  This allows
-    # the entire arguments list to be accessed by transition callbacks through
-    # StateMachine::Transition#args like so:
+    # However, these overriden methods are not called when events are triggered
+    # using event attributes ( +vehicle.state_event = 'park'; vehicle.save+ ).
+    # Instead, use a +before_transition+, +after_transition+ or
+    # +around_transition+ with the :on => :event_name option, which still have
+    # access to any arguments passed into the event method:
     # 
     #   after_transition :on => :park do |vehicle, transition|
-    #     kind = *transition.args
+    #     kind = *transition.args # transition.args will be an array of the arguments passed to vehicle.park()
     #     ...
     #   end
     # 
